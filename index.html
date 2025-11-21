@@ -1,1 +1,273 @@
-Hello World ！
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amzing Food - Magic Wok Chef</title>
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --bg-color: #f7f1e3;
+            --pan-color: #2d3436;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        h1 { color: var(--primary-color); margin-bottom: 10px; }
+        .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 30px; }
+
+        /* Game Container */
+        .game-container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        /* Wok Area */
+        .wok-area {
+            position: relative;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .wok {
+            width: 150px;
+            height: 150px;
+            background-color: var(--pan-color);
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 15px solid #000;
+            transition: transform 0.2s;
+        }
+        .wok::after {
+            content: '';
+            position: absolute;
+            right: -60px;
+            top: 50%;
+            width: 70px;
+            height: 20px;
+            background: #444;
+            border-radius: 10px;
+            transform: rotate(-10deg); /* Handle */
+        }
+        .wok-contents {
+            font-size: 2.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100px;
+            z-index: 2;
+        }
+
+        /* Animations */
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 2px, 0) rotate(2deg); }
+            20%, 80% { transform: translate3d(4px, -2px, 0) rotate(-2deg); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0) rotate(2deg); }
+            40%, 60% { transform: translate3d(6px, 0, 0) rotate(-2deg); }
+        }
+
+        /* Ingredients Grid */
+        .ingredients-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .ingredient-btn {
+            background: #f1f2f6;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ingredient-btn:hover { transform: scale(1.1); background: #e1e2e6; }
+        .ingredient-btn:active { transform: scale(0.95); }
+
+        /* Action Buttons */
+        .action-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #e05656;
+            transition: all 0.1s;
+        }
+        .action-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #e05656; }
+        .action-btn:disabled { background-color: #ccc; box-shadow: none; cursor: not-allowed; }
+
+        /* Result Modal */
+        .result-modal {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #fff3cd;
+            display: none;
+            animation: popIn 0.3s ease;
+        }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        .dish-name { font-size: 1.5rem; font-weight: bold; color: #333; margin: 5px 0; }
+        .dish-desc { color: #666; font-size: 0.9rem; }
+
+    </style>
+</head>
+<body>
+
+    <h1>🍳 Amzing Wok</h1>
+    <p class="subtitle">Tap ingredients to cook delicious dishes!</p>
+
+    <div class="game-container">
+        <div class="wok-area">
+            <div class="wok" id="wok">
+                <div class="wok-contents" id="wokContents"></div>
+            </div>
+        </div>
+
+        <div class="ingredients-grid">
+            <button class="ingredient-btn" onclick="addIngredient('🍅', 'Tomato')">🍅</button>
+            <button class="ingredient-btn" onclick="addIngredient('🥚', 'Egg')">🥚</button>
+            <button class="ingredient-btn" onclick="addIngredient('🍚', 'Rice')">🍚</button>
+            <button class="ingredient-btn" onclick="addIngredient('🥩', 'Beef')">🥩</button>
+            <button class="ingredient-btn" onclick="addIngredient('🥔', 'Potato')">🥔</button>
+            <button class="ingredient-btn" onclick="addIngredient('🌶️', 'Chili')">🌶️</button>
+            <button class="ingredient-btn" onclick="addIngredient('🥬', 'Greens')">🥬</button>
+            <button class="ingredient-btn" onclick="addIngredient('🦐', 'Shrimp')">🦐</button>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 10px;">
+            <button class="action-btn" id="cookBtn" onclick="cook()">🔥 Cook Now</button>
+            <button class="action-btn" style="background-color: #747d8c; box-shadow: 0 4px 0 #57606f;" onclick="resetWok()">🗑️ Clear</button>
+        </div>
+
+        <div class="result-modal" id="resultArea">
+            <div>✨ Cooking Complete! You made:</div>
+            <div class="dish-name" id="dishName"></div>
+            <div class="dish-desc" id="dishDesc"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentIngredients = [];
+        const wokContents = document.getElementById('wokContents');
+        const resultArea = document.getElementById('resultArea');
+        const cookBtn = document.getElementById('cookBtn');
+        const wok = document.getElementById('wok');
+
+        // Recipe Database (English)
+        const recipes = [
+            { ingredients: ['🍅', '🥚'], name: "Tomato Scrambled Eggs", desc: "A classic comfort dish, sweet and tangy!" },
+            { ingredients: ['🍚', '🥚'], name: "Egg Fried Rice", desc: "Simple yet difficult to master. Golden grains." },
+            { ingredients: ['🥩', '🥔'], name: "Beef Potato Stew", desc: "It's a wok, but we can stew too!" },
+            { ingredients: ['🌶️', '🥩'], name: "Spicy Stir-fried Beef", desc: "Rice killer! Spicy and savory." },
+            { ingredients: ['🥬', '🦐'], name: "Crystal Shrimp & Greens", desc: "Healthy, light, and beautiful." },
+            { ingredients: ['🥔', '🌶️'], name: "Sour & Spicy Potato Shreds", desc: "Crunchy and appetizing." },
+            { ingredients: ['🥚', '🦐'], name: "Silky Egg with Shrimp", desc: "Tender eggs with fresh shrimp." },
+            { ingredients: ['🍚', '🥩', '🥚'], name: "Deluxe Beef Fried Rice", desc: "Meat added! Double the happiness." }
+        ];
+
+        function addIngredient(emoji, name) {
+            if (currentIngredients.length >= 3) {
+                alert("The wok is full! Cook this batch first!");
+                return;
+            }
+            currentIngredients.push(emoji);
+            renderWok();
+            resultArea.style.display = 'none';
+        }
+
+        function renderWok() {
+            wokContents.innerHTML = currentIngredients.join('');
+        }
+
+        function resetWok() {
+            currentIngredients = [];
+            renderWok();
+            resultArea.style.display = 'none';
+            cookBtn.disabled = false;
+            cookBtn.innerText = "🔥 Cook Now";
+            wok.classList.remove('shake');
+        }
+
+        function cook() {
+            if (currentIngredients.length === 0) {
+                alert("The wok is empty! Are you cooking air?");
+                return;
+            }
+
+            // 1. Animation
+            cookBtn.disabled = true;
+            cookBtn.innerText = "Cooking...";
+            wok.classList.add('shake');
+
+            // 2. Cooking simulation (1.5s)
+            setTimeout(() => {
+                finishCooking();
+            }, 1500);
+        }
+
+        function finishCooking() {
+            wok.classList.remove('shake');
+            
+            // 3. Match Recipe
+            let foundDish = null;
+            
+            // Simple matching logic: Check if ingredients match regardless of order
+            for (let recipe of recipes) {
+                let match = true;
+                if (recipe.ingredients.length !== currentIngredients.length) continue;
+                
+                let tempCurrent = [...currentIngredients].sort();
+                let tempRecipe = [...recipe.ingredients].sort();
+                
+                for(let i=0; i<tempCurrent.length; i++) {
+                    if(tempCurrent[i] !== tempRecipe[i]) match = false;
+                }
+
+                if (match) {
+                    foundDish = recipe;
+                    break;
+                }
+            }
+
+            // 4. Show Result
+            resultArea.style.display = 'block';
+            if (foundDish) {
+                document.getElementById('dishName').innerText = "🍲 " + foundDish.name;
+                document.getElementById('dishDesc').innerText = foundDish.desc;
+                wokContents.innerHTML = "🍲"; // Show cooked dish in wok
+            } else {
+                document.getElementById('dishName').innerText = "🌚 Mystery Goop";
+                document.getElementById('dishDesc').innerText = "Only you could come up with this combo...";
+                wokContents.innerHTML = "🌚";
+            }
+
+            cookBtn.disabled = false;
+            cookBtn.innerText = "🔥 Cook Again";
+            currentIngredients = []; // Reset logic, keep visuals until next action
+        }
+    </script>
+</body>
+</html>
